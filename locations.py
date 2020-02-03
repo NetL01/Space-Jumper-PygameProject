@@ -16,6 +16,7 @@ class Location(object):
         self.window = pygame.display.get_surface()
         self.parent = parent
         self.background = pygame.image.load('img/background.png').convert()
+        self.lose = pygame.image.load('img/original.jpg').convert()
     def event(self,event):
         pass
     def draw(self):
@@ -29,8 +30,8 @@ class StartLocation(Location):
         Location.__init__(self, parent)
         pygame.mouse.set_visible(1)
         pygame.key.set_repeat(0)
-        self.startbtn = Button(240, 200, "Start")
-        self.exitbtn = Button(240, 270, "Exit")
+        self.startbtn = Button(240, 200, "Начать")
+        self.exitbtn = Button(240, 270, "Выйти")
         self.controls = pygame.sprite.Group()
         self.surfaces = []
         self.controls_captions = pygame.sprite.Group()
@@ -56,7 +57,7 @@ class StartLocation(Location):
                     btn.changeState(0)
         elif event.type == MOUSEBUTTONUP:
             if self.startbtn.rect.collidepoint(pygame.mouse.get_pos()):
-                name = inputbox.ask(self.window, "Your name")
+                name = inputbox.ask(self.window, "Имя:")
                 if name:
                     self.parent.location = GameLocation(self.parent, name)
             elif self.exitbtn.rect.collidepoint(pygame.mouse.get_pos()):
@@ -92,6 +93,8 @@ class GameLocation(Location):
         self.window.blit(self.background, (0, 0))
         
         self.monster = None
+
+        self.allsprites.add(Platform((config.screen_width / 2), (config.screen_height - 50)))
     
     
     def randomPlatform(self,top = True):
@@ -136,7 +139,7 @@ class GameLocation(Location):
                     self.monster.move()
             else:
                 self.monster.move()
-                # touch monster
+                # полёт монстра по прямой к прошлому месту джампера
                 if self.doodle.rect.colliderect(self.monster.rect):
                     self.doodle.alive = 0
                 if self.monster.y >= screen_height:
@@ -158,12 +161,10 @@ class GameLocation(Location):
                         self.doodle.set_x(0)
             self.doodle.move_y(-self.doodle.ySpeed)
             for spr in self.allsprites:
-                # if spring  under legs
                 if isinstance(spr, Spring) and self.doodle.get_legs_rect().colliderect(spr.get_top_surface()) and self.doodle.ySpeed <= 0:
                     spr.compress()
                     self.doodle.ySpeed = spring_speed
                 
-                # if platform under legs
                 if isinstance(spr, Platform) and self.doodle.get_legs_rect().colliderect(spr.get_surface_rect()) and self.doodle.ySpeed <= 0:
                     if isinstance(spr,CrashingPlatform):
                         spr.crash()
@@ -198,7 +199,37 @@ class GameLocation(Location):
             self.window.blit(self.header, (0,0))
         else:
             #if dead - load exit location
-            self.parent.location = GameLocation(self.parent,self.doodle.name)
+            # self.parent.location = GameLocation(self.parent,self.doodle.name)
+
+            self.rever()
+            
+    def rever(self):
+        font = pygame.font.Font(None, 40)
+        gray = pygame.Color('gray19')
+        blue = pygame.Color('dodgerblue')
+        # The clock is used to limit the frame rate
+        # and returns the time since last tick.
+        clock = pygame.time.Clock()
+        timer = 10  # Decrease this to count down.
+        dt = 0  # Delta time (time since last tick).
+
+        done = False
+        while not done:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
+
+            timer -= dt
+            if timer <= 0:
+                timer = 10  # Reset it to 10 or do something else.
+                done =  True
+            # self.window.fill(gray)
+            self.window.blit(self.lose, (-170,0))
+            txt = font.render(str(round(timer, 2)), True, blue)
+            self.window.blit(txt, (250, 300))
+            pygame.display.flip()
+            dt = clock.tick(30) / 1000  # / 1000 to convert to seconds.
+        self.parent.location = GameLocation(self.parent,self.doodle.name)
 
     def event(self,event):
         if event.type == KEYDOWN:
@@ -208,7 +239,6 @@ class GameLocation(Location):
                 self.doodle.set_x(self.doodle.x + 10)
             
 
-# game stats and exit location
 class ExitLocation(Location):
     def __init__(self, parent, name, score):
         Location.__init__(self, parent)

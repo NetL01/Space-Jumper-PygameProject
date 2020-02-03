@@ -75,7 +75,7 @@ class Doodle(Sprite):
         self.image = self.img_r
         self.image.set_colorkey(self.image.get_at((0,0)), RLEACCEL)
         self.rect = self.image.get_rect()
-        self.rect.center = (self.x,self.y)
+        self.rect.center = (self.x, self.y)
 
     def _move(self):
         "метод, меремещающий дудлера"
@@ -84,16 +84,16 @@ class Doodle(Sprite):
             self.alive = 0     
     
     def get_legs_rect(self):
-        "метод, получающий прямоугольник под ногами дудлера" 
-        left = self.rect.left + self.rect.width*0.1
+        # прямоугольник у ног джампера
+        left = self.rect.left
         top = self.rect.top + self.rect.height*0.9
-        width = self.rect.width*0.6
+        width = self.rect.width
         height = self.rect.height*0.1
         return pygame.Rect(left, top, width, height)
 		
     
     def set_x(self, x):
-        "метод, устанавливающий положение дудлера по оси X"
+        # джампер по x
         if x < self.x:
             self.image = self.img_l
         elif x > self.x:
@@ -104,10 +104,11 @@ class Doodle(Sprite):
         self._move()
     
     def inc_y_speed(self, speed):
-        "метод, увеличивающий скорость дудлера"
+        # увеличение скорости
         self.ySpeed = self.ySpeed + speed
     
     def inc_score(self, score):
+        # total 
         self.score = self.score + score
         
 
@@ -135,13 +136,14 @@ class MovingPlatform(Platform):
     def __init__(self, x, y):
         Platform.__init__(self, x, y)
         self.init_image('img/blueplatform.png')    
-        self.way = -1 # 1 or -1 platform way
+        self.way = -1 # 1 или -1 (влево или вправо)
         self.xSpeed = randint(2, 6)
         self.spring = None
 
     def move(self):
-        self.move_x(self.xSpeed*self.way)
-        if  10 < self.x < 19 or 460 < self.x < 469:
+        self.move_x(self.xSpeed * self.way)
+        # изменение направления движения, если дошли до границ
+        if (10 < self.x < 19) or (460 < self.x < 469):
             self.way = - self.way
     
 class CrashingPlatform(Platform):
@@ -153,21 +155,26 @@ class CrashingPlatform(Platform):
         self.spring = None
     
     def crash(self):
+        # сломавшаяся платформа
         self.init_image('img/brownplatformbr.png')
         self.crashed = 1
     
     def move(self):
+        # проверка, сломалась ли
         if self.crashed == 0:
             pass
         
         elif self.crashed == 1:
+            # падает со скоростью джампера, вместе с ним
             self.move_y(self.ySpeed)
     def renew(self):
+        # новая генерация
         Platform.renew(self)
         self.init_image('img/brownplatform.png')
         self.crashed = 0
         
 class Spring(Sprite):
+    # метод, отвечающий за пружины 
     def __init__(self, x, y):
         self.x = x
         self.y = y

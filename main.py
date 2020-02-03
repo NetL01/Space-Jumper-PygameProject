@@ -7,6 +7,8 @@ import pygame
 from pygame.locals import *
 import sys
 
+from os import path
+
 from locations import *
 from sprites import *
 
@@ -19,7 +21,8 @@ class Game():
     def __init__(self):
         pygame.init()
         window = pygame.display.set_mode((screen_width, screen_height))
-        pygame.display.set_caption('Doodle jump')
+        pygame.display.set_caption('Space Jumper')
+        
     def event(self, event):
         if event.type == QUIT:
             sys.exit()
@@ -47,7 +50,14 @@ def main():
         for event in pygame.event.get():
             game.location.event(event)
             game.event(event)            
-            
+
+pygame.mixer.init()
+pygame.mixer.music.load('game.mp3')
+pygame.mixer.music.play()
+pygame.mixer.music.set_volume(0.4)
+
+
+
     
 if __name__ == "__main__":
     main()
