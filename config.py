@@ -6,7 +6,7 @@ screen_height = 640
 platform_width = 100
 fps = 45
 
-doodle_start_position = [240,350]
+jumper_start_position = [240,350]
 
 horizont = 300
 mouse_enabled = False
